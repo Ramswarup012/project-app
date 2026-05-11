@@ -1,0 +1,10 @@
+{
+  "appId": "com.probattle.app",
+  "appName": "probattle",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://probattle.com",
+    "cleartext": false
+  }
+}
