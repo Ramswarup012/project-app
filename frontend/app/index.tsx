@@ -64,7 +64,7 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          <Pressable style={styles.primaryButton}>
+          <Pressable onPress={() => router.replace('/home')} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Login</Text>
           </Pressable>
 

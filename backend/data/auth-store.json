@@ -4,15 +4,15 @@
     {
       "id": 1,
       "email": "test@example.com",
-      "password": "$2a$10$g9ZK70Js93uREwdaRni3u.f87qq2BuhWokvCLW7fu6v0eUNhWeLpK",
+      "password": "$2a$10$NH0f3DJqq09AfnJSuQv0cO5GUyOw65XbI1gRmvUcEwg3nCqYbR0FK",
       "name": "Test User",
       "phone": "9999999999",
       "wallet": 0,
       "uid": "PB100001",
       "avatar": null,
       "kyc_verified": 0,
-      "created_at": "2026-05-11T13:52:16.672Z",
-      "updated_at": "2026-05-11T13:52:16.673Z"
+      "created_at": "2026-05-11T14:18:59.298Z",
+      "updated_at": "2026-05-11T14:18:59.299Z"
     }
   ]
 }
