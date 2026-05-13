@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -17,6 +17,56 @@ export default function SignupScreen() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleSignup = async () => {
+  if (
+    !fullName ||
+    !emailOrUsername ||
+    !mobile ||
+    !password ||
+    !confirmPassword
+  ) {
+    alert("All fields are required");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://10.221.241.122:3001/api/auth/signup",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email: emailOrUsername,
+          phone: mobile,
+          password: password,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    console.log(data);
+
+    if (data.success) {
+      alert("Account created successfully");
+      router.replace("/home");
+    } else {
+      alert(data.error);
+    }
+  } catch (error) {
+    console.log(error);
+    alert("Server error");
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -88,7 +138,7 @@ export default function SignupScreen() {
             style={styles.input}
           />
 
-          <Pressable style={styles.primaryButton}>
+          <Pressable onPress={handleSignup} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Create account</Text>
           </Pressable>
 

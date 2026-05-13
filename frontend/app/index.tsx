@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Pressable,
   SafeAreaView,
@@ -15,6 +16,40 @@ export default function LoginScreen() {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+
+const handleLogin = async () => {
+  try {
+
+    const response = await fetch("http://10.221.241.122:3001/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: emailOrUsername,
+        password: password,
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    if (data.success) {
+      // await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      // await AsyncStorage.setItem("usertoken", data.token);
+      alert("Login Successful");
+      router.replace("/home");
+    } else {
+      alert(data.error);
+    }
+
+  } catch (error) {
+    console.log(error);
+    alert("Server Error");
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -64,7 +99,7 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          <Pressable onPress={() => router.replace('/home')} style={styles.primaryButton}>
+          <Pressable onPress={handleLogin} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Login</Text>
           </Pressable>
 

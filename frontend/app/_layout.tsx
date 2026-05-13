@@ -16,6 +16,19 @@ export default function RootLayout() {
         <Stack.Screen name="signup" options={{ headerShown: false }} />
         <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
         <Stack.Screen name="biometric" options={{ headerShown: false }} />
+        <Stack.Screen name="wallet" options={{ headerShown: false }} />
+        <Stack.Screen name="notification" options={{ headerShown: false }} />
+        <Stack.Screen name="csheadshot" options={{ headerShown: false }} />
+        <Stack.Screen name="lw" options={{ headerShown: false }} />
+        <Stack.Screen name="lwhead" options={{ headerShown: false }} />
+        <Stack.Screen name="brsurvival" options={{ headerShown: false }} />
+        <Stack.Screen name="br" options={{ headerShown: false }} />
+        <Stack.Screen name="csbody" options={{ headerShown: false }} />
+        <Stack.Screen name="freemaches" options={{ headerShown: false }} />
+        <Stack.Screen name="challenge" options={{ headerShown: false }} />
+        <Stack.Screen name="earn" options={{ headerShown: false }} />
+        <Stack.Screen name="leaderboard" options={{ headerShown: false }} />
+        <Stack.Screen name="menu" options={{ headerShown: false }} /> 
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
