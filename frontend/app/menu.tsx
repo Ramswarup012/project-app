@@ -1,4 +1,5 @@
 import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -27,7 +28,20 @@ const MenuScreen = () => {
     { id: 'about', label: 'About Us', icon: 'information-circle', onPress: () => {} },
     { id: 'privacy', label: 'Privacy Policy', icon: 'lock-closed', onPress: () => {} },
     { id: 'terms', label: 'Terms & Conditions', icon: 'shield-checkmark', onPress: () => {} },
-    { id: 'logout', label: 'Logout', icon: 'log-out', onPress: () => router.replace('/') },
+    {
+  id: 'logout',
+  label: 'Logout',
+  icon: 'log-out',
+  onPress: async () => {
+
+    await AsyncStorage.removeItem("usertoken");
+
+    await AsyncStorage.removeItem("user");
+
+    router.replace('/');
+
+  }
+},
   ];
 
   const renderMenuItem = (item: any) => {

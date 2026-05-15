@@ -46,7 +46,9 @@ async function signup({ email, password, name, phone }) {
     return null;
   }
 
-  const user = await userRepository.createUser({ email, password, name, phone });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await userRepository.createUser({ email, password: hashedPassword, name, phone });
 
   if (!user) {
     return null;

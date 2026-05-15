@@ -25,7 +25,11 @@ async function initializeDatabase() {
   }
 
   try {
-    client = new MongoClient(mongoUri);
+    client = new MongoClient(mongoUri, {
+      tlsInsecure: true,
+      retryWrites: true,
+      serverSelectionTimeoutMS: 5000,
+    });
     await client.connect();
 
     db = client.db(mongoDbName);

@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Pressable,
-  SafeAreaView,
+
   ScrollView,
   StyleSheet,
   Text,
@@ -10,18 +11,33 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  useEffect(() => {
 
+  const checkLogin = async () => {
+
+    const token = await AsyncStorage.getItem("usertoken");
+
+    if (token) {
+      router.replace("/home");
+    }
+
+  };
+
+  checkLogin();
+
+}, []);
 
 const handleLogin = async () => {
   try {
 
-    const response = await fetch("http://10.221.241.122:3001/api/auth/login", {
+    const response = await fetch("http://10.125.166.122:3001/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,9 +53,10 @@ const handleLogin = async () => {
     console.log(data);
 
     if (data.success) {
-      // await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      // await AsyncStorage.setItem("usertoken", data.token);
+       await AsyncStorage.setItem("user", JSON.stringify(data.user));
+       await AsyncStorage.setItem("usertoken", data.token);
       alert("Login Successful");
+
       router.replace("/home");
     } else {
       alert(data.error);

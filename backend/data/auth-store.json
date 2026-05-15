@@ -1,31 +1,18 @@
 {
-  "lastId": 2,
+  "lastId": 1,
   "users": [
     {
       "id": 1,
       "email": "test@example.com",
-      "password": "$2a$10$0A/l1zFC1Qey2IHL0kOZE.N1vxxcF832moRECb1JeLszk6T00A7kC",
+      "password": "$2a$10$/2rcoRkh2NkwIQTzeTzOPeFlw.g.ZX0EQdCzy88CPvnpsEoCif3eC",
       "name": "Test User",
       "phone": "9999999999",
       "wallet": 0,
       "uid": "PB100001",
       "avatar": null,
       "kyc_verified": 0,
-      "created_at": "2026-05-13T09:52:27.968Z",
-      "updated_at": "2026-05-13T09:52:27.970Z"
-    },
-    {
-      "id": 2,
-      "email": "Ramswarup012",
-      "password": "$2a$10$cwL9Glb1U7witgxx8vjqEeqPmso/jro5/o.K.sSEqI/M7wN7SdB5y",
-      "name": "Ram",
-      "phone": "6367665425",
-      "wallet": 0,
-      "uid": "PB100002",
-      "avatar": null,
-      "kyc_verified": 0,
-      "created_at": "2026-05-13T11:20:00.076Z",
-      "updated_at": "2026-05-13T11:20:00.076Z"
+      "created_at": "2026-05-15T04:59:08.721Z",
+      "updated_at": "2026-05-15T04:59:08.721Z"
     }
   ]
 }
