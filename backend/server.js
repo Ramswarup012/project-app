@@ -1,6 +1,7 @@
-const { createApp } = require('./src/app');
+const { createApp } = require('./app');
 const { initializeDatabase, getDatabaseMode } = require('./src/config/db');
 const { apiPort } = require('./src/config/env');
+
 
 async function startServer() {
   await initializeDatabase();

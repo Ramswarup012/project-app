@@ -1,3 +1,4 @@
+let withdrawalsCollection = null;
 const bcrypt = require('bcryptjs');
 const { MongoClient } = require('mongodb');
 const { mongoUri, mongoDbName, useMongo } = require('./env');
@@ -34,6 +35,7 @@ async function initializeDatabase() {
 
     db = client.db(mongoDbName);
     usersCollection = db.collection('users');
+    withdrawalsCollection = db.collection("withdrawals");
 
     await usersCollection.createIndex({ email: 1 }, { unique: true });
     await usersCollection.createIndex({ uid: 1 }, { unique: true, sparse: true });
@@ -72,6 +74,10 @@ async function initializeDatabase() {
 function getUsersCollection() {
   return usersCollection;
 }
+  
+function getWithdrawalsCollection() {
+  return withdrawalsCollection;
+}
 
 function isMongoReady() {
   return useMongo && databaseMode === 'mongodb' && Boolean(usersCollection);
@@ -84,6 +90,7 @@ function getDatabaseMode() {
 module.exports = {
   initializeDatabase,
   getUsersCollection,
+  getWithdrawalsCollection,
   isMongoReady,
   getDatabaseMode,
   generateUid

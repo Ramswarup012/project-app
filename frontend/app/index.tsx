@@ -37,7 +37,7 @@ export default function LoginScreen() {
 const handleLogin = async () => {
   try {
 
-    const response = await fetch("http://10.125.166.122:3001/api/auth/login", {
+    const response = await fetch("http://10.147.182.122:3001/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const handleLogin = async () => {
 
           <View style={styles.biometricWrap}>
             <Text style={styles.orText}>Or continue with</Text>
-            <Pressable onPress={() => router.push('/biometric')} style={styles.biometricButton}>
+            <Pressable onPress={() => router.push('/')} style={styles.biometricButton}>
               <Text style={styles.biometricIcon}>◉</Text>
               <Text style={styles.biometricButtonText}>Use biometric sign in</Text>
             </Pressable>
@@ -380,3 +380,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
+
+// import { Redirect } from "expo-router";
+
+// export default function Index() {
+//   return <Redirect href="/dashboard" />;
+// }

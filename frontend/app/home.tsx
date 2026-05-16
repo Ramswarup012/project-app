@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useEffect,
+} from 'react';
 import {
   StyleSheet,
   View,
@@ -14,69 +17,159 @@ import {
 import {LinearGradient} from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import API from '../services/api';
 
 const { width } = Dimensions.get('window');
 
-const GAMES = [
-  { id: '1', title: 'BR SURVIVAL', players: 33, image: 'https://i.ytimg.com/vi/R77w-xcaxdI/maxresdefault.jpg' },
-  { id: '2', title: 'CLASH SQUAD HEADSHOT', players: 32, image: 'https://i.ytimg.com/vi/rk6WkDwquWE/maxresdefault.jpg' },
-  { id: '3', title: 'CLASH SQUAD', players: 30, image: 'https://i.ytimg.com/vi/8p3LlKKh9UI/maxresdefault.jpg' },
-  { id: '4', title: 'LONE WOLF', players: 66, image: 'https://staticg.sportskeeda.com/editor/2022/04/46189-16505245613120-1920.jpg' },
-  { id: '5', title: 'LONE WOLF HEADSHOT', players: 12, image: 'https://i.ytimg.com/vi/PwYZ0mo3UAM/maxresdefault.jpg' },
-  { id: '6', title: 'BATTLE ROYALE', players: 20, image: 'https://i.ytimg.com/vi/NmO0JsyCYSU/maxresdefault.jpg' },
-  { id: '7', title: 'CHALLENGE', players: 45, image: 'https://tse4.mm.bing.net/th/id/OIP.1aQTOPi74KEXY04ita6QsQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3' },
-  { id: '8', title: 'FREE MATCHES', players: 128, image: 'https://i.ytimg.com/vi/4YC_-wBlJaM/maxresdefault.jpg' },
+// const GAMES = [
+//   { id: '1', title: 'BR SURVIVAL', players: 33, image: 'https://i.ytimg.com/vi/R77w-xcaxdI/maxresdefault.jpg' },
+//   { id: '2', title: 'CLASH SQUAD HEADSHOT', players: 32, image: 'https://i.ytimg.com/vi/rk6WkDwquWE/maxresdefault.jpg' },
+//   { id: '3', title: 'CLASH SQUAD', players: 30, image: 'https://i.ytimg.com/vi/8p3LlKKh9UI/maxresdefault.jpg' },
+//   { id: '4', title: 'LONE WOLF', players: 66, image: 'https://staticg.sportskeeda.com/editor/2022/04/46189-16505245613120-1920.jpg' },
+//   { id: '5', title: 'LONE WOLF HEADSHOT', players: 12, image: 'https://i.ytimg.com/vi/PwYZ0mo3UAM/maxresdefault.jpg' },
+//   { id: '6', title: 'BATTLE ROYALE', players: 20, image: 'https://i.ytimg.com/vi/NmO0JsyCYSU/maxresdefault.jpg' },
+//   { id: '7', title: 'CHALLENGE', players: 45, image: 'https://tse4.mm.bing.net/th/id/OIP.1aQTOPi74KEXY04ita6QsQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3' },
+//   { id: '8', title: 'FREE MATCHES', players: 128, image: 'https://i.ytimg.com/vi/4YC_-wBlJaM/maxresdefault.jpg' },
+// ];
+
+const GAME_CATEGORIES = [
+
+  {
+    id: "1",
+
+    title: "Clash Squad",
+
+    image:
+      "https://wallpaperaccess.com/full/4893732.jpg",
+  },
+
+  {
+    id: "2",
+
+    title: "Battle Royale",
+
+    image:
+      "https://wallpaperaccess.com/full/1628377.jpg",
+  },
+
+  {
+    id: "3",
+
+    title: "Lone Wolf",
+
+    image:
+      "https://wallpaperaccess.com/full/4893841.jpg",
+  },
+
+  {
+    id: "4",
+
+    title: "Free Matches",
+
+    image:
+      "https://wallpaperaccess.com/full/3059057.jpg",
+  },
+
 ];
+
+
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [tournaments, setTournaments] =
+  useState([]);
 
-  const handleGamePress = (title: string) => {
-    switch(title) {
-      case 'BR SURVIVAL':
-        router.push('/brsurvival');
-        break;
-      case 'CLASH SQUAD HEADSHOT':
-        router.push('/csheadshot');
-        break;
-      case 'CLASH SQUAD':
-        router.push('/csbody');
-        break;
-      case 'LONE WOLF':
-        router.push('/lw');
-        break;
-      case 'LONE WOLF HEADSHOT':
-        router.push('/lwhead');
-        break;
-      case 'BATTLE ROYALE':
-        router.push('/br');
-        break;
-      case 'CHALLENGE':
-        router.push('/challenge');
-        break;
-      case 'FREE MATCHES':
-        router.push('/freemaches');
-        break;
-      default:
-        break;
+const fetchTournaments =
+  async () => {
+
+    try {
+
+      const response =
+        await API.get(
+          "/tournaments/all"
+        );
+
+      setTournaments(
+        response.data.tournaments
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
     }
+
   };
 
-  const renderGame = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.gameCard} onPress={() => handleGamePress(item.title)}>
-      <Image 
-        source={{ uri: item.image }} 
-        style={styles.gameImage} 
-      />
-      <View style={styles.gameFooter}>
-        <Text style={styles.gameTitle}>{item.title}</Text>
-        <View style={styles.playerCount}>
-          <View style={styles.greenDot} />
-          <Text style={styles.playerText}>{item.players}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+useEffect(() => {
+
+  fetchTournaments();
+
+}, []);
+
+ 
+
+
+
+const renderGame = ({
+  item,
+}: {
+  item: any
+}) => (
+
+  <TouchableOpacity
+
+    style={styles.gameCard}
+
+    onPress={() =>
+
+      router.push({
+
+        pathname:
+          "/category-tournaments",
+
+        params: {
+          category:
+            item.title,
+        },
+
+      })
+
+    }
+
+  >
+
+    <Image
+      source={{
+        uri: item.image,
+      }}
+      style={styles.gameImage}
+    />
+
+    <LinearGradient
+
+      colors={[
+        "transparent",
+        "rgba(0,0,0,0.9)",
+      ]}
+
+      style={styles.overlay}
+
+    >
+
+      <Text style={styles.gameTitle}>
+        {item.title}
+      </Text>
+
+      <Text style={styles.viewText}>
+        View Tournaments
+      </Text>
+
+    </LinearGradient>
+
+  </TouchableOpacity>
+
+);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -140,7 +233,7 @@ export default function HomeScreen() {
         <Text style={[styles.sectionTitle, { marginTop: 18 }]}>Esports Games</Text>
 
         <FlatList
-          data={GAMES}
+          data={GAME_CATEGORIES}
           keyExtractor={(i) => i.id}
           renderItem={renderGame}
           numColumns={2}
@@ -313,6 +406,20 @@ const styles = StyleSheet.create({
     marginTop: 14,
     gap: 12,
   },
+  overlay: {
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  padding: 14,
+},
+
+viewText: {
+  color: "#FFB800",
+  fontWeight: "bold",
+  marginTop: 6,
+  fontSize: 13,
+},
   gameCard: { 
     width: (width - 48) / 2, 
     backgroundColor: 'rgba(9, 42, 54, 0.9)', 

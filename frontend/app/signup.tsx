@@ -37,7 +37,7 @@ export default function SignupScreen() {
 
   try {
     const response = await fetch(
-      "http://10.125.166.122:3001/api/auth/signup",
+      "http://10.147.182.122:3001/api/auth/signup",
       {
         method: "POST",
         headers: {

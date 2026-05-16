@@ -83,6 +83,7 @@ const MenuScreen = () => {
           <Ionicons name="chevron-forward" size={24} color="#7fa8c1" />
         )}
       </TouchableOpacity>
+ 
     );
   };
 
@@ -96,6 +97,24 @@ const MenuScreen = () => {
         <Text style={styles.headerTitle}>Menu</Text>
         <View style={{ width: 30 }} />
       </View>
+
+      <TouchableOpacity
+
+  style={styles.adminButton}
+
+  onPress={() =>
+    router.push(
+      "/admin-login"
+    )
+  }
+
+>
+
+  <Text style={styles.adminText}>
+    Admin Panel
+  </Text>
+
+</TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Profile Section */}
@@ -211,6 +230,20 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
   },
+
+  adminButton: {
+  backgroundColor: "#FFB800",
+  padding: 18,
+  borderRadius: 18,
+  alignItems: "center",
+  marginTop: 20,
+},
+
+adminText: {
+  color: "#000000",
+  fontWeight: "bold",
+  fontSize: 18,
+},
   statItem: {
     flex: 1,
     alignItems: 'center',

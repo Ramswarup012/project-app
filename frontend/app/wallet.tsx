@@ -1,155 +1,420 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
+  useFocusEffect,
+} from "@react-navigation/native";
+
+import { router } from "expo-router";
+
+import axios from "axios";
+
+import {
   View,
-} from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 
-const WalletScreen = () => {
-  const router = useRouter();
-  return (
-   <>   
-      <Stack.Screen options={{ headerShown: false }} />
-    <SafeAreaView style={styles.container}>
-     
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={30} color="#fff" />
-        </TouchableOpacity>
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-        <Text style={styles.headerTitle}>Wallet</Text>
 
-        <View style={{ width: 30 }} />
-      </View>
 
-      {/* Balance Section */}
-      <View style={styles.balanceContainer}>
-        <Text style={styles.totalBalance}>Total Balance = 0</Text>
 
-        <View style={styles.line} />
 
-        <View style={styles.balanceRow}>
-          <Text style={styles.balanceText}>Deposit Balance: 0</Text>
+export default function WalletScreen() {
 
-          <Text style={styles.balanceText}>Win Balance: 0</Text>
-        </View>
-      </View>
+  const [wallet, setWallet] =
+    useState({
 
-      {/* Buttons */}
-      <TouchableOpacity style={styles.buyButton}>
-        <Text style={styles.buttonText}>Buy More</Text>
-      </TouchableOpacity>
+      balance: 0,
 
-      <TouchableOpacity style={styles.withdrawButton}>
-        <Text style={styles.buttonText}>Withdraw</Text>
-      </TouchableOpacity>
+      bonus: 0,
 
-      {/* History */}
-      <View style={styles.historyContainer}>
-        <Text style={styles.historyText}>Wallet history</Text>
-      </View>
-    </SafeAreaView>
-    </>
+      winnings: 0,
+
+    });
+
+
+
+  const [loading, setLoading] =
+    useState(true);
+
+
+
+
+
+  useEffect(() => {
+
+    fetchWallet();
+
+  }, []);
+
+
+
+
+
+  useFocusEffect(
+
+    React.useCallback(() => {
+
+      fetchWallet();
+
+    }, [])
+
   );
-};
 
-export default WalletScreen;
+
+
+
+
+  const fetchWallet = async () => {
+
+    try {
+
+      const token =
+        await AsyncStorage.getItem(
+          "usertoken"
+        );
+
+
+
+
+      const response =
+        await axios.get(
+
+          "http://10.147.182.122:3001/api/auth/me",
+
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+
+
+
+      const user =
+        response.data.user;
+
+
+
+
+
+      setWallet({
+
+        balance:
+          Number(user.wallet) || 0,
+
+        bonus: 0,
+
+        winnings:
+          Number(user.wallet) || 0,
+
+      });
+
+
+
+
+    } catch (error) {
+
+      console.log(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
+
+
+
+
+  if (loading) {
+
+    return (
+
+      <View style={styles.loader}>
+
+        <ActivityIndicator
+          size="large"
+          color="#FFB800"
+        />
+
+      </View>
+    );
+  }
+
+
+
+
+
+
+  return (
+
+    <ScrollView style={styles.container}>
+
+      <Text style={styles.heading}>
+        My Wallet
+      </Text>
+
+
+
+
+
+      <View style={styles.balanceCard}>
+
+        <Text style={styles.balanceLabel}>
+          Total Balance
+        </Text>
+
+        <Text style={styles.balance}>
+          ₹{wallet.balance}
+        </Text>
+
+      </View>
+
+
+
+
+
+      <View style={styles.row}>
+
+        <View style={styles.smallCard}>
+
+          <Text style={styles.cardAmount}>
+            ₹{wallet.bonus}
+          </Text>
+
+          <Text style={styles.cardLabel}>
+            Bonus
+          </Text>
+
+        </View>
+
+
+
+
+
+        <View style={styles.smallCard}>
+
+          <Text style={styles.cardAmount}>
+            ₹{wallet.winnings}
+          </Text>
+
+          <Text style={styles.cardLabel}>
+            Winnings
+          </Text>
+
+        </View>
+
+      </View>
+
+
+
+
+
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() =>
+          router.push("/add-money")
+        }
+      >
+
+        <Text style={styles.buttonText}>
+          Add Money
+        </Text>
+
+      </TouchableOpacity>
+
+
+
+
+
+
+      <TouchableOpacity
+        style={styles.withdrawButton}
+        onPress={() =>
+          router.push("/withdraw")
+        }
+      >
+
+        <Text style={styles.buttonText}>
+          Withdraw
+        </Text>
+
+      </TouchableOpacity>
+
+
+
+
+
+
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={() =>
+          router.push("/transactions")
+        }
+      >
+
+        <Text style={styles.buttonText}>
+          Transaction History
+        </Text>
+
+      </TouchableOpacity>
+
+    </ScrollView>
+  );
+}
+
+
+
+
+
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: '#001F44',
+    backgroundColor: "#0A0A0A",
+    padding: 20,
   },
 
-  header: {
-    backgroundColor: '#074270',
-    height: 70,
-   //
-   // borderBottomRightRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
+
+
+
+  loader: {
+    flex: 1,
+    backgroundColor: "#0A0A0A",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  headerTitle: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
 
-  balanceContainer: {
-    alignItems: 'center',
-    marginTop: 90,
-  },
 
-  totalBalance: {
-    color: '#fff',
+
+  heading: {
+    color: "#FFFFFF",
     fontSize: 34,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    marginTop: 50,
+    marginBottom: 30,
   },
 
-  line: {
-    width: 190,
-    height: 8,
-    backgroundColor: '#6C63FF',
-    borderRadius: 10,
-    marginTop: 20,
+
+
+
+  balanceCard: {
+    backgroundColor: "#FFB800",
+    borderRadius: 24,
+    padding: 30,
+    marginBottom: 24,
   },
 
-  balanceRow: {
-    flexDirection: 'row',
-    marginTop: 70,
-    width: '85%',
-    justifyContent: 'space-between',
+
+
+
+  balanceLabel: {
+    color: "#000000",
+    fontSize: 18,
+    marginBottom: 10,
   },
 
-  balanceText: {
-    color: '#00FF7F',
-    fontSize: 22,
+
+
+
+  balance: {
+    color: "#000000",
+    fontSize: 40,
+    fontWeight: "bold",
   },
 
-  buyButton: {
-    backgroundColor: '#00D84A',
-    marginHorizontal: 30,
-    marginTop: 90,
-    height: 75,
+
+
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 30,
+  },
+
+
+
+
+  historyButton: {
+    backgroundColor: "#333333",
+    padding: 18,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
+    marginTop: 18,
   },
+
+
+
+
+  smallCard: {
+    backgroundColor: "#161616",
+    width: "48%",
+    borderRadius: 20,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: "#252525",
+  },
+
+
+
+
+  cardAmount: {
+    color: "#00FF99",
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
+
+
+
+  cardLabel: {
+    color: "#AAAAAA",
+    fontSize: 15,
+  },
+
+
+
+
+  addButton: {
+    backgroundColor: "#00C853",
+    padding: 18,
+    borderRadius: 18,
+    alignItems: "center",
+    marginBottom: 18,
+  },
+
+
+
 
   withdrawButton: {
-    backgroundColor: '#FF2643',
-    marginHorizontal: 30,
-    marginTop: 30,
-    height: 75,
+    backgroundColor: "#FF4D6D",
+    padding: 18,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
   },
+
+
+
 
   buttonText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '500',
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 
-  historyContainer: {
-    marginTop: 150,
-    alignItems: 'center',
-  },
-
-  historyText: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
 });

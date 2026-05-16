@@ -1,15 +1,19 @@
 const express = require('express');
+const tournamentRoutes = require("./src/routes/tournamentRoutes");
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const paymentRoutes = require("./src/routes/paymentRoutes");
+const withdrawalRoutes = require("./src/routes/withdrawalRoutes");
 
 function createApp() {
   const app = express();
 
   app.use(cors());
   app.use(express.json());
+  app.use('/api/tournaments', tournamentRoutes);
 
   app.get('/api/health', (req, res) => {
-    const { getDatabaseMode } = require('./config/db');
+    const { getDatabaseMode } = require('./src/config/db');
     res.json({
       success: true,
       message: 'ProBattle API is running',
@@ -18,7 +22,8 @@ function createApp() {
   });
 
   app.use('/api/auth', authRoutes);
-
+  app.use('/api/payments', paymentRoutes);
+  app.use('/api/withdrawals', withdrawalRoutes);
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
   });
