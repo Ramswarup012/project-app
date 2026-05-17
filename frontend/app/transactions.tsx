@@ -1,223 +1,156 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 
+import { Stack } from "expo-router";
+
 import API from "../services/api";
-import {
-  Stack,
-} from "expo-router";
-
-
-
-
 
 export default function Transactions() {
+  const [transactions, setTransactions] = useState([]);
 
-  const [transactions, setTransactions] =
-    useState([]);
+  const [loading, setLoading] = useState(true);
 
+  /* =========================
+     FETCH TRANSACTIONS
+  ========================= */
 
+  const fetchTransactions = async () => {
+    try {
+      const response = await API.get("/payments/transactions/PB100001");
 
-
-
-  const fetchTransactions =
-    async () => {
-
-      try {
-
-        const response =
-          await API.get(
-
-            "/payments/transactions/PB100001"
-
-          );
-
-
-
-
-        setTransactions(
-          response.data.transactions
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-    };
-
-
-
-
+      setTransactions(response.data.transactions || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-
     fetchTransactions();
-
   }, []);
 
+  /* =========================
+     RENDER ITEM
+  ========================= */
 
+  const renderItem = ({ item }: { item: any }) => {
+    const status = item.status?.toLowerCase();
 
+    return (
+      <View style={styles.card}>
+        {/* LEFT SIDE */}
 
+        <View>
+          <Text style={styles.type}>
+            {item.type === "deposit"
+              ? "Add Money"
+              : item.type === "withdraw"
+                ? "Withdrawal"
+                : item.type}
+          </Text>
 
+          <Text style={styles.date}>
+            {new Date(item.createdAt).toLocaleDateString()}
 
-  const renderItem = ({
-    item,
-  }: {
-    item: any;
-  }) => (
+            {" • "}
 
-    <View style={styles.card}>
-
-
-
-
-
-      {/* LEFT SIDE */}
-      <View>
-
-        <Text style={styles.type}>
-          {item.type}
-        </Text>
-
-
-
-
-
-        <Text style={styles.date}>
-
-          {
-            new Date(
-              item.createdAt
-            ).toLocaleDateString()
-          }
-
-          {" • "}
-
-          {
-            new Date(
-              item.createdAt
-            ).toLocaleTimeString([], {
-
+            {new Date(item.createdAt).toLocaleTimeString([], {
               hour: "2-digit",
 
               minute: "2-digit",
+            })}
+          </Text>
+        </View>
 
-            })
-          }
+        {/* RIGHT SIDE */}
 
-        </Text>
-
-      </View>
-
-
-
-
-
-
-      {/* RIGHT SIDE */}
-      <View
-        style={{
-          alignItems: "flex-end",
-        }}
-      >
-
-        <Text style={styles.amount}>
-          ₹{item.amount}
-        </Text>
-
-
-
-
-
-        <Text
-          style={[
-
-            styles.status,
-
-            item.status === "pending"
-              ? styles.pending
-              : item.status === "completed"
-              ? styles.completed
-              : styles.rejected,
-
-          ]}
+        <View
+          style={{
+            alignItems: "flex-end",
+          }}
         >
+          <Text style={styles.amount}>₹{item.amount}</Text>
 
-          {item.status
-            ? item.status.toUpperCase()
-            : "PENDING"}
+          <Text
+            style={[
+              styles.status,
 
-        </Text>
-
+              status === "pending"
+                ? styles.pending
+                : status === "approved" ||
+                    status === "completed" ||
+                    status === "success"
+                  ? styles.completed
+                  : styles.rejected,
+            ]}
+          >
+            {status === "approved" ||
+            status === "completed" ||
+            status === "success"
+              ? "COMPLETED"
+              : status === "pending"
+                ? "PENDING"
+                : "REJECTED"}
+          </Text>
+        </View>
       </View>
+    );
+  };
 
-    </View>
-  );
-
-
-<Stack.Screen
-  options={{
-    headerShown: false,
-  }}
-/>
-
-
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#00FF99" />
+      </View>
+    );
+  }
 
   return (
-
-    <View style={styles.container}>
-
-      <Text style={styles.heading}>
-        Transactions
-      </Text>
-
-
-
-
-
-      <FlatList
-
-        data={transactions}
-
-        renderItem={renderItem}
-
-        keyExtractor={(item: any) =>
-          item._id
-        }
-
-        showsVerticalScrollIndicator={false}
-
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
       />
 
-    </View>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Transactions</Text>
+
+        <FlatList
+          data={transactions}
+          renderItem={renderItem}
+          keyExtractor={(item: any) => item._id}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No Transactions Found</Text>
+          }
+        />
+      </View>
+    </>
   );
 }
 
-
-
-
-
-
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: "#0A0A0A",
     padding: 16,
   },
 
-
-
-
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0A0A0A",
+  },
 
   heading: {
     color: "#FFFFFF",
@@ -227,14 +160,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-
-
-
-
   card: {
     backgroundColor: "#121212",
+
     borderRadius: 22,
+
     padding: 20,
+
     marginBottom: 18,
 
     flexDirection: "row",
@@ -261,20 +193,12 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 
-
-
-
-
-
   type: {
     color: "#FFFFFF",
     fontSize: 20,
     fontWeight: "700",
+    textTransform: "capitalize",
   },
-
-
-
-
 
   date: {
     color: "#777777",
@@ -282,48 +206,35 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
-
-
-
-
   amount: {
     color: "#00FF99",
     fontSize: 24,
     fontWeight: "bold",
   },
 
-
-
-
-
   status: {
     marginTop: 6,
     fontSize: 13,
     fontWeight: "bold",
+    letterSpacing: 1,
   },
-
-
-
-
 
   pending: {
     color: "#FFB800",
   },
 
-
-
-
-
   completed: {
     color: "#00E676",
   },
-
-
-
-
 
   rejected: {
     color: "#FF5252",
   },
 
+  emptyText: {
+    color: "#777777",
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
+  },
 });

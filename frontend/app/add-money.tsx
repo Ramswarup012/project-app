@@ -1,300 +1,241 @@
-import React, {
-  useState,
-} from "react";
-import * as ImagePicker
-  from "expo-image-picker";
+import React, { useState } from "react";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import API from "../services/api";
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
-  Alert,
-  Image,
+  TextInput,
   ScrollView,
 } from "react-native";
 
+import { useRouter } from "expo-router";
+
 export default function AddMoney() {
+  const router = useRouter();
 
-  const [amount, setAmount] =
-    useState("");
+  const [amount, setAmount] = useState("");
 
-  const [screenshot, setScreenshot] =
-    useState<any>(null);
+  const quickAmounts = [20, 50, 100, 200, 500, 1000];
 
-  const pickScreenshot =
-    async () => {
+  const handleProceed = () => {
+    if (!amount) return;
 
-      const result =
-        await ImagePicker.launchImageLibraryAsync({
+    router.push({
+      pathname: "/payment-processing",
 
-          mediaTypes:
-            ImagePicker.MediaTypeOptions.Images,
-
-          quality: 1,
-
-        });
-
-      if (!result.canceled) {
-
-        setScreenshot(
-          result.assets[0].uri
-        );
-
-      }
-
-    };
-const handleAddMoney =
-  async () => {
-
-    try {
-
-      if (!amount) {
-
-        Alert.alert(
-          "Enter Amount"
-        );
-
-        return;
-
-      }
-
-      if (!screenshot) {
-
-        Alert.alert(
-          "Upload Payment Screenshot"
-        );
-
-        return;
-
-      }
-
-      await API.post(
-
-        "/payments/submit-request",
-
-        {
-
-          uid: "PB100001",
-
-          amount,
-
-          screenshot,
-
-        }
-
-      );
-
-      Alert.alert(
-
-        "Request Submitted",
-
-        "Admin will verify your payment screenshot."
-
-      );
-
-      setAmount("");
-
-      setScreenshot(null);
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
+      params: {
+        amount,
+      },
+    });
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-    >
-
-      <Text style={styles.heading}>
-        Add Money
-      </Text>
-
-      <View style={styles.card}>
-
-        <Text style={styles.label}>
-          Enter Amount
-        </Text>
-
-        <Image
-
-          source={require(
-            "../assets/images/upi-qr.jpg"
-          )}
-
-          style={styles.qr}
-
-        />
-
-        <Text style={styles.scanText}>
-          Scan & Pay Using Any UPI App
-        </Text>
-
-        <TextInput
-
-          placeholder="Enter amount"
-
-          placeholderTextColor="#777"
-
-          keyboardType="numeric"
-
-          value={amount}
-
-          onChangeText={setAmount}
-
-          style={styles.input}
-
-        />
-
-        <TouchableOpacity
-
-          style={styles.uploadButton}
-
-          onPress={pickScreenshot}
-
-        >
-
-          <Text style={styles.uploadText}>
-            Upload Payment Screenshot
-          </Text>
-
-        </TouchableOpacity>
-
-        {
-          screenshot && (
-
-            <Image
-
-              source={{
-                uri: screenshot,
-              }}
-
-              style={styles.preview}
-
-            />
-
-          )
-        }
-
-        <TouchableOpacity
-
-          style={styles.button}
-
-          onPress={handleAddMoney}
-
-        >
-
-          <Text style={styles.buttonText}>
-            Proceed Payment
-          </Text>
-
-        </TouchableOpacity>
-
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Recharge</Text>
       </View>
 
+      <View style={styles.balanceContainer}>
+        <Text style={styles.balanceLabel}>Total Balance</Text>
+
+        <Text style={styles.balance}>₹ 0</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.title}>Amount</Text>
+
+        <View style={styles.amountBox}>
+          <Text style={styles.rupee}>₹</Text>
+
+          <TextInput
+            placeholder="10 ~ 1000"
+            placeholderTextColor="#7B8794"
+            keyboardType="numeric"
+            value={amount}
+            onChangeText={setAmount}
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.limitRow}>
+          <Text style={styles.limitText}>Minimum: ₹10</Text>
+
+          <Text style={styles.limitText}>Maximum: ₹1000</Text>
+        </View>
+
+        <View style={styles.quickContainer}>
+          {quickAmounts.map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={styles.quickButton}
+              onPress={() => setAmount(String(item))}
+            >
+              <Text style={styles.quickText}>₹{item}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleProceed}>
+          <Text style={styles.buttonText}>Add Money</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
-
   );
-
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: "#0A0A0A",
-    padding: 20,
+    backgroundColor: "#031B34",
   },
 
-  heading: {
+  header: {
+    backgroundColor: "#06396B",
+
+    paddingTop: 52,
+
+    paddingBottom: 20,
+
+    alignItems: "center",
+
+    borderBottomLeftRadius: 24,
+
+    borderBottomRightRadius: 24,
+  },
+
+  headerTitle: {
     color: "#FFFFFF",
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: "bold",
-    marginTop: 60,
-    marginBottom: 30,
+  },
+
+  balanceContainer: {
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 22,
+  },
+
+  balanceLabel: {
+    color: "#D8E6F5",
+    fontSize: 18,
+    marginBottom: 6,
+  },
+
+  balance: {
+    color: "#FFFFFF",
+    fontSize: 42,
+    fontWeight: "bold",
   },
 
   card: {
-    backgroundColor: "#161616",
+    backgroundColor: "#F5F7FA",
+
+    marginHorizontal: 16,
+
     borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "#252525",
+
+    padding: 18,
+
+    paddingBottom: 24,
   },
 
-  label: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    marginBottom: 16,
+  title: {
+    color: "#111111",
+    fontSize: 26,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+
+  amountBox: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    borderBottomWidth: 2,
+
+    borderColor: "#D9DDE5",
+
+    paddingBottom: 10,
+  },
+
+  rupee: {
+    color: "#111111",
+    fontSize: 38,
+    fontWeight: "bold",
+    marginRight: 8,
   },
 
   input: {
-    backgroundColor: "#0F0F0F",
-    borderRadius: 16,
-    padding: 16,
-    color: "#FFFFFF",
+    flex: 1,
+
+    color: "#7B8794",
+
+    fontSize: 40,
+
+    fontWeight: "bold",
+
+    paddingVertical: 0,
+  },
+
+  limitRow: {
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+
+    marginTop: 10,
+
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#333333",
+  },
+
+  limitText: {
+    color: "#9AA0AD",
+    fontSize: 13,
+  },
+
+  quickContainer: {
+    flexDirection: "row",
+
+    flexWrap: "wrap",
+
+    justifyContent: "space-between",
+  },
+
+  quickButton: {
+    backgroundColor: "#DCE9F7",
+
+    width: "31%",
+
+    paddingVertical: 16,
+
+    borderRadius: 14,
+
+    alignItems: "center",
+
+    marginBottom: 14,
+  },
+
+  quickText: {
+    color: "#111111",
+    fontSize: 20,
+    fontWeight: "700",
   },
 
   button: {
-    backgroundColor: "#00C853",
-    padding: 18,
-    borderRadius: 18,
+    backgroundColor: "#0066FF",
+
+    paddingVertical: 18,
+
+    borderRadius: 16,
+
     alignItems: "center",
+
+    marginTop: 10,
   },
 
   buttonText: {
     color: "#FFFFFF",
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
   },
-
-  qr: {
-    width: 220,
-    height: 220,
-    alignSelf: "center",
-    borderRadius: 20,
-    marginBottom: 20,
-  },
-
-  uploadButton: {
-    backgroundColor: "#1F1F1F",
-    padding: 16,
-    borderRadius: 16,
-    alignItems: "center",
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#333333",
-  },
-
-  uploadText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
-
-  preview: {
-    width: "100%",
-    height: 220,
-    borderRadius: 18,
-    marginBottom: 20,
-  },
-
-  scanText: {
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginBottom: 24,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-
 });

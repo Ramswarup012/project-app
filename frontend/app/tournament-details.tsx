@@ -206,10 +206,10 @@ export default function TournamentDetails() {
             router.push({
 
               pathname:
-                "/join-match",
+                "/select-slot",
 
               params: {
-                tournamentId:
+                id:
                   tournament._id,
               },
 

@@ -3,16 +3,32 @@ const express = require("express");
 const router = express.Router();
 
 const {
+
   createWithdrawalRequest,
+
   getAllWithdrawals,
-} = require("../controllers/withdrawalController");
 
-const authMiddleware = require("../middleware/authMiddleware");
+  approveWithdrawal,
+
+  rejectWithdrawal,
+
+} = require(
+  "../controllers/withdrawalController"
+);
+
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
 
 
 
 
-// USER
+
+/* =========================
+   USER
+========================= */
+
 router.post(
   "/request",
   authMiddleware,
@@ -22,12 +38,35 @@ router.post(
 
 
 
-// ADMIN
+
+/* =========================
+   ADMIN
+========================= */
+
 router.get(
   "/all",
   authMiddleware,
   getAllWithdrawals
 );
+
+
+
+
+router.put(
+  "/approve/:id",
+  authMiddleware,
+  approveWithdrawal
+);
+
+
+
+
+router.put(
+  "/reject/:id",
+  authMiddleware,
+  rejectWithdrawal
+);
+
 
 
 

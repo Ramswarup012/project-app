@@ -1,3 +1,8 @@
+const {
+  createOrder,
+} = require(
+  "../controllers/paymentController"
+);
 const express = require("express");
 
 console.log("PAYMENT ROUTES LOADED");
@@ -98,6 +103,11 @@ router.get(
   }
 );
 
+
+router.post(
+  "/create-order",  
+  createOrder
+);
 
 
 

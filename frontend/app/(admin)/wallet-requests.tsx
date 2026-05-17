@@ -1,35 +1,184 @@
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 
-const requests = [
+import API from "../../services/api";
 
-  {
-    id: 1,
-    name: "Shadow Killer",
-    amount: "₹500",
-    method: "UPI",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-  },
 
-  {
-    id: 2,
-    name: "Legend Gamer",
-    amount: "₹1200",
-    method: "Paytm",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-  },
-
-];
 
 export default function WalletRequests() {
+
+  const [requests, setRequests] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+
+
+
+  /* =========================
+     FETCH REQUESTS
+  ========================= */
+
+  const fetchRequests =
+    async () => {
+
+      try {
+        console.log(
+  "Fetching withdrawals..."
+);
+
+        const response =
+          await API.get(
+
+            "/withdrawals/all"
+          );
+
+        console.log(
+  "API RESPONSE = ",
+  response.data
+);
+
+setRequests(
+  response.data.withdrawals || []
+);
+
+      } catch (error) {
+
+        console.log(error);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+
+
+  useEffect(() => {
+
+    fetchRequests();
+
+  }, []);
+
+
+
+
+
+  /* =========================
+     APPROVE
+  ========================= */
+
+  const approveRequest =
+    async (id: string) => {
+
+      try {
+
+        await API.put(
+
+          `/withdrawals/approve/${id}`
+
+        );
+
+        Alert.alert(
+          "Success",
+          "Withdrawal approved"
+        );
+
+        fetchRequests();
+
+      } catch (error) {
+
+        console.log(error);
+
+        Alert.alert(
+          "Error",
+          "Approval failed"
+        );
+
+      }
+
+    };
+
+
+
+
+
+  /* =========================
+     REJECT
+  ========================= */
+
+  const rejectRequest =
+    async (id: string) => {
+
+      try {
+
+        await API.put(
+
+          `/withdrawals/reject/${id}`
+
+        );
+
+        Alert.alert(
+          "Success",
+          "Withdrawal rejected"
+        );
+
+        fetchRequests();
+
+      } catch (error) {
+
+        console.log(error);
+
+        Alert.alert(
+          "Error",
+          "Reject failed"
+        );
+
+      }
+
+    };
+
+
+
+
+
+
+  if (loading) {
+
+    return (
+
+      <View style={styles.loader}>
+
+        <ActivityIndicator
+          size="large"
+          color="#00FF99"
+        />
+
+      </View>
+
+    );
+
+  }
+
+
+
+
+
 
   return (
 
@@ -39,52 +188,108 @@ export default function WalletRequests() {
         Wallet Requests
       </Text>
 
+
+
+
+
       {
-        requests.map((item) => (
+        requests.map((item: any) => (
 
           <View
-            key={item.id}
+            key={item._id}
             style={styles.card}
           >
-
-            <Image
-              source={{ uri: item.image }}
-              style={styles.avatar}
-            />
 
             <View style={styles.info}>
 
               <Text style={styles.name}>
-                {item.name}
+                User ID:
+              </Text>
+
+              <Text style={styles.userId}>
+                {item.userId}
               </Text>
 
               <Text style={styles.amount}>
-                {item.amount}
+                ₹{item.amount}
               </Text>
 
               <Text style={styles.method}>
-                Method: {item.method}
+                UPI: {item.upiId}
+              </Text>
+
+              <Text style={styles.status}>
+                Status:
+                {" "}
+                {item.status}
               </Text>
 
             </View>
 
+
+
+
+
             <View>
 
-              <TouchableOpacity
-                style={styles.approveButton}
-              >
-                <Text style={styles.buttonText}>
-                  Approve
-                </Text>
-              </TouchableOpacity>
+              {
+                item.status ===
+                "pending" && (
 
-              <TouchableOpacity
-                style={styles.rejectButton}
-              >
-                <Text style={styles.buttonText}>
-                  Reject
-                </Text>
-              </TouchableOpacity>
+                  <>
+
+                    <TouchableOpacity
+                      style={
+                        styles.approveButton
+                      }
+
+                      onPress={() =>
+                        approveRequest(
+                          item._id
+                        )
+                      }
+                    >
+
+                      <Text
+                        style={
+                          styles.buttonText
+                        }
+                      >
+                        Approve
+                      </Text>
+
+                    </TouchableOpacity>
+
+
+
+
+
+                    <TouchableOpacity
+                      style={
+                        styles.rejectButton
+                      }
+
+                      onPress={() =>
+                        rejectRequest(
+                          item._id
+                        )
+                      }
+                    >
+
+                      <Text
+                        style={
+                          styles.buttonText
+                        }
+                      >
+                        Reject
+                      </Text>
+
+                    </TouchableOpacity>
+
+                  </>
+
+                )
+              }
 
             </View>
 
@@ -96,7 +301,14 @@ export default function WalletRequests() {
     </ScrollView>
 
   );
+
 }
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
 
@@ -104,6 +316,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0A0A0A",
     padding: 20,
+  },
+
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0A0A0A",
   },
 
   heading: {
@@ -117,62 +336,64 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#161616",
     borderRadius: 18,
-    padding: 15,
+    padding: 18,
     marginBottom: 18,
-    flexDirection: "row",
-    alignItems: "center",
     borderWidth: 1,
     borderColor: "#252525",
   },
 
-  avatar: {
-    width: 65,
-    height: 65,
-    borderRadius: 32,
-  },
-
   info: {
-    flex: 1,
-    marginLeft: 15,
+    marginBottom: 15,
   },
 
   name: {
     color: "#FFFFFF",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 5,
+  },
+
+  userId: {
+    color: "#AAAAAA",
+    marginBottom: 10,
   },
 
   amount: {
     color: "#00FF99",
-    fontSize: 17,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 10,
   },
 
   method: {
-    color: "#AAAAAA",
-    fontSize: 14,
+    color: "#CCCCCC",
+    marginBottom: 8,
+  },
+
+  status: {
+    color: "#FFD54F",
+    fontWeight: "bold",
   },
 
   approveButton: {
     backgroundColor: "#00C853",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
     marginBottom: 10,
   },
 
   rejectButton: {
     backgroundColor: "#FF4D6D",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
   },
 
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
+    fontSize: 15,
   },
 
 });

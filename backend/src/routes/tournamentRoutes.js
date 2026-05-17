@@ -2,6 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
+
 const {
   deleteTournament,
   getJoinedContests,
@@ -17,6 +22,7 @@ const {
   getLeaderboard,
   submitPaymentRequest,
   getWallet,
+  getBookedSlots,
 } = require(
   "../controllers/tournamentController"
 );
@@ -28,6 +34,7 @@ router.post(
 
 router.post(
   "/join",
+  authMiddleware,
   joinTournament
 );
 
@@ -50,6 +57,12 @@ router.delete(
   "/delete/:id",
   deleteTournament
 );
+
+router.get(
+  "/booked-slots/:id",
+  getBookedSlots
+);
+
 router.get(
   "/room/:id",
   getRoomDetails

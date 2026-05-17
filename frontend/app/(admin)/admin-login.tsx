@@ -9,11 +9,20 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 
 import {
   useRouter,
 } from "expo-router";
+
+import AsyncStorage from
+  "@react-native-async-storage/async-storage";
+
+import API from "../../services/api";
+
+
+
 
 
 export default function AdminLogin() {
@@ -27,32 +36,133 @@ export default function AdminLogin() {
   const [password, setPassword] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
+
+
+
+
+
   const handleLogin =
-    () => {
+    async () => {
 
-      if (
+      try {
 
-        email ===
-          "admin@gmail.com" &&
+        setLoading(true);
 
-        password ===
-          "admin123"
+        const response =
+          await API.post(
 
-      ) {
+            "/auth/login",
 
-        router.push(
-          "/(admin)/dashboard"
-        );
+            {
+              email,
+              password,
+            }
 
-      } else {
+          );
+
+
+
+
+
+
+        if (
+          response.data.success
+        ) {
+
+          /* =====================
+             SAVE TOKEN
+          ===================== */
+
+     console.log(
+  "TOKEN = ",
+  response.data.token
+);
+
+await AsyncStorage.setItem(
+  "token",
+  response.data.token
+);
+
+const savedToken =
+  await AsyncStorage.getItem(
+    "token"
+  );
+
+console.log(
+  "SAVED TOKEN = ",
+  savedToken
+);
+
+
+
+
+          /* =====================
+             SAVE USER
+          ===================== */
+
+          await AsyncStorage.setItem(
+
+            "user",
+
+            JSON.stringify(
+              response.data.user
+            )
+
+          );
+
+
+
+
+
+
+          Alert.alert(
+            "Success",
+            "Admin Login Successful"
+          );
+
+
+
+
+
+
+          router.replace(
+            "/(admin)/dashboard"
+          );
+
+        }
+
+      } catch (error: any) {
+
+        console.log(error);
 
         Alert.alert(
-          "Invalid Admin Credentials"
+
+          "Login Failed",
+
+          error?.response?.data
+            ?.error ||
+
+          "Invalid credentials"
+
         );
+
+      } finally {
+
+        setLoading(false);
 
       }
 
     };
+
+
+
+
+
+
+
 
   return (
 
@@ -61,6 +171,11 @@ export default function AdminLogin() {
       <Text style={styles.title}>
         ADMIN PANEL
       </Text>
+
+
+
+
+
 
       <TextInput
 
@@ -75,6 +190,11 @@ export default function AdminLogin() {
         style={styles.input}
 
       />
+
+
+
+
+
 
       <TextInput
 
@@ -92,17 +212,37 @@ export default function AdminLogin() {
 
       />
 
+
+
+
+
+
+
       <TouchableOpacity
 
         style={styles.button}
 
         onPress={handleLogin}
 
+        disabled={loading}
+
       >
 
-        <Text style={styles.buttonText}>
-          Login
-        </Text>
+        {
+          loading ? (
+
+            <ActivityIndicator
+              color="#000"
+            />
+
+          ) : (
+
+            <Text style={styles.buttonText}>
+              Login
+            </Text>
+
+          )
+        }
 
       </TouchableOpacity>
 
@@ -111,6 +251,13 @@ export default function AdminLogin() {
   );
 
 }
+
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
 

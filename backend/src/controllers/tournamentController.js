@@ -34,6 +34,8 @@ exports.createTournament = async (
 
     const tournament = {
       ...req.body,
+      slots: Number(req.body.slots),
+      totalSlots: Number(req.body.slots),
       createdAt: new Date(),
     };
 
@@ -167,6 +169,29 @@ exports.joinTournament = async (
     const { ObjectId } =
       require("mongodb");
 
+    // Get authenticated user from token
+    const authenticatedUserId =
+      req.user?.id ||
+      req.user?._id;
+
+    console.log(
+      "Authenticated User ID:",
+      authenticatedUserId
+    );
+
+    if (!authenticatedUserId) {
+
+      return res.status(401).json({
+
+        success: false,
+
+        message:
+          "User not authenticated",
+
+      });
+
+    }
+
     const joinData = {
 
       tournamentId:
@@ -177,6 +202,11 @@ exports.joinTournament = async (
 
       userUID:
         req.body.userUID,
+
+      slotNumber:
+        Number(
+          req.body.slotNumber
+        ),
 
       joinedAt: new Date(),
 
@@ -204,10 +234,13 @@ exports.joinTournament = async (
 
     }
 
+    // Find user by ObjectId (from token)
     const user =
       await usersCollection.findOne({
 
-        uid: req.body.userUID,
+        _id: new ObjectId(
+          authenticatedUserId
+        ),
 
       });
 
@@ -223,6 +256,13 @@ exports.joinTournament = async (
       });
 
     }
+
+    console.log(
+      "User found:",
+      user.email,
+      "Wallet:",
+      user.wallet
+    );
 
     if (
 
@@ -262,8 +302,8 @@ exports.joinTournament = async (
         tournamentId:
           req.body.tournamentId,
 
-        userUID:
-          req.body.userUID,
+        userId:
+          authenticatedUserId,
 
       });
 
@@ -280,6 +320,33 @@ exports.joinTournament = async (
 
     }
 
+    // Check if slot is already booked
+    const slotBooked =
+      await joinedCollection.findOne({
+
+        tournamentId:
+          req.body.tournamentId,
+
+        slotNumber:
+          Number(
+            req.body.slotNumber
+          ),
+
+      });
+
+    if (slotBooked) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          "This slot is already booked",
+
+      });
+
+    }
+
     await joinedCollection.insertOne(
       joinData
     );
@@ -287,7 +354,9 @@ exports.joinTournament = async (
     await usersCollection.updateOne(
 
       {
-        uid: req.body.userUID,
+        _id: new ObjectId(
+          authenticatedUserId
+        ),
       },
 
       {
@@ -331,7 +400,10 @@ exports.joinTournament = async (
 
   } catch (error) {
 
-    console.log(error);
+    console.log(
+      "joinTournament Error:",
+      error.message
+    );
 
     res.status(500).json({
 
@@ -344,6 +416,104 @@ exports.joinTournament = async (
   }
 
 };
+
+exports.getBookedSlots = async (
+  req,
+  res
+) => {
+
+  try {
+
+    console.log(
+      "Getting Booked Slots for:",
+      req.params.id
+    );
+
+    const { ObjectId } =
+      require("mongodb");
+
+    // Validate ID format
+    if (
+      !ObjectId.isValid(
+        req.params.id
+      )
+    ) {
+
+      console.log(
+        "Invalid ObjectId format for slots:",
+        req.params.id
+      );
+
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          "Invalid tournament ID",
+
+      });
+
+    }
+
+    const db =
+      getUsersCollection().db;
+
+    const joinedCollection =
+      db.collection(
+        "joinedContests"
+      );
+
+    const bookedSlots =
+      await joinedCollection
+        .find({
+
+          tournamentId:
+            new ObjectId(
+              req.params.id
+            ),
+
+        })
+        .project({ slotNumber: 1 })
+        .toArray();
+
+    console.log(
+      "Booked slots count:",
+      bookedSlots.length
+    );
+
+    const slotNumbers =
+      bookedSlots.map(
+        (entry) =>
+          entry.slotNumber
+      );
+
+    res.status(200).json({
+
+      success: true,
+
+      bookedSlots: slotNumbers,
+
+    });
+
+  } catch (error) {
+
+    console.log(
+      "getBookedSlots Error:",
+      error.message
+    );
+
+    res.status(500).json({
+
+      success: false,
+
+      message: error.message,
+
+    });
+
+  }
+
+};
+
 exports.getJoinedContests =
   async (req, res) => {
 
@@ -455,6 +625,37 @@ exports.getSingleTournament =
 
     try {
 
+      console.log(
+        "Getting Tournament ID:",
+        req.params.id
+      );
+
+      const { ObjectId } =
+        require("mongodb");
+
+      // Validate ID format
+      if (
+        !ObjectId.isValid(
+          req.params.id
+        )
+      ) {
+
+        console.log(
+          "Invalid ObjectId format:",
+          req.params.id
+        );
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Invalid tournament ID format",
+
+        });
+
+      }
+
       const db =
         getUsersCollection().db;
 
@@ -462,9 +663,6 @@ exports.getSingleTournament =
         db.collection(
           "tournaments"
         );
-
-      const { ObjectId } =
-        require("mongodb");
 
       const tournament =
         await tournamentsCollection.findOne({
@@ -475,6 +673,35 @@ exports.getSingleTournament =
 
         });
 
+      console.log(
+        "Tournament Found:",
+        tournament ? "Yes" : "No"
+      );
+
+      if (!tournament) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "Tournament not found",
+
+        });
+
+      }
+
+      // Ensure totalSlots is set for backward compatibility
+      if (
+        tournament &&
+        !tournament.totalSlots
+      ) {
+        
+        tournament.totalSlots =
+          tournament.slots;
+        
+      }
+
       res.status(200).json({
         success: true,
         tournament,
@@ -482,7 +709,10 @@ exports.getSingleTournament =
 
     } catch (error) {
 
-      console.log(error);
+      console.log(
+        "getSingleTournament Error:",
+        error.message
+      );
 
       res.status(500).json({
         success: false,
